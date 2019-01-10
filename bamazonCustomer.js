@@ -10,15 +10,40 @@ var connection = mysql.createConnection({
 
     host: "localhost",
     port: 3306,
-    user: "Zach",
-    password: "Enter Password here",
+    user: "root",
+    password: "password",
     database: "bamazon"
 
 });
 
+//This function will ask the user if they want to continue shopping, restarting the start() function if 
+//yes and ending the connection if no//
+function buyMore(){
 
+    inquirer.prompt([{
+        name: "Continue",
+        type: "list",
+        message: "Continue shopping?",
+        choices: ["Yes please!", "No thanks!"]
+    }
 
+])
+.then(function(answer) {
+   
+    if (answer.Continue === "Yes please!") {
+        start();
+    
+    } else {
 
+        connection.end();
+   
+    }
+
+});
+
+};
+
+//start() function contains the app// 
 function start() {
 
     // Selects the database from mysql
@@ -84,7 +109,7 @@ function start() {
                             {
                                 //this tells the program where to change the stock number, i.e. at the 
                                 //respective position of the chosen item
-                                product_name: answer.Purchase
+                                id: answer.Purchase
                             }
                         ],
 
@@ -101,7 +126,7 @@ function start() {
 
                             console.log("Thank you for your purchase!");
                             console.log("You're total is: " + "$" + totalCost);
-                            console.log("[Press Ctr + C to quit]");
+                            buyMore();
 
                           
                         }
@@ -113,8 +138,8 @@ function start() {
                 //enough stock left
                 else if (answer.stock > stock) {
 
-                    console.log('Insufficient stock!');
-                    console.log("[Press Ctr + C to quit]");
+                    console.log("Insufficient stock! Please pick another item");
+                    buyMore();
 
                
                 }
@@ -122,6 +147,13 @@ function start() {
     }
     );
 };
+
+
+   
+
+
+
+
 
 //checks for connection, if successful run start()
 connection.connect(function (err) {
