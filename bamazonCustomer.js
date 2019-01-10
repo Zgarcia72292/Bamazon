@@ -16,14 +16,7 @@ var connection = mysql.createConnection({
 
 });
 
-//checks for connection, if successful run start()
-connection.connect(function (err) {
 
-    if (err) throw err;
-
-    start();
-
-});
 
 
 function start() {
@@ -52,8 +45,8 @@ function start() {
         //this prompt will ask the user which item they want to buy
         inquirer.prompt([{
             name: "Purchase",
-            type: "rawlist",
-            message: "Welcome to Bamazon, which item would you like to purchase? (Please enter product ID number)",
+            type: "input",
+            message: "Welcome to Bamazon, which item would you like to purchase? (Please enter product ID number) [Press Ctr + C to quit]",
             choices: itemList
         },
 
@@ -61,15 +54,17 @@ function start() {
         {
             name: "stock",
             type: "input",
-            message: "How much/many would you like to buy? (Enter number)",
+            message: "How much/many would you like to buy? (Enter number) [Press Ctr + C to quit]",
 
         }
         ])
             .then(function (answer) {
 
                 //creating a stock variable that will check the respective stock of the selected
-                //item from the "Purchase" prompt in the sql table if it exists//
-                var stock = results[itemList.indexOf(answer.purchase)].stock_quantity;
+                //item from the "Purchase" prompt in the sql table if it exists.
+                //i subtracted 1 because arrays start at postion 0 but the items in the table
+                //begin at 1
+                var stock = results[answer.Purchase - 1].stock_quantity;
 
                 //this variable takes the saved number from the "stock" prompt and subtracts it from the 
                 //stock value in the table. 
@@ -99,15 +94,16 @@ function start() {
                             if (err) throw err;
 
                             //this variable will grab the price of the matching item
-                            var cost = response[itemList.indexOf(answer.purchase)].price;
-
+                            var cost = results[answer.Purchase - 1].price;
+                            
                             //this variable will multiply the price of the selected item by the amount of stock
                             var totalCost = answer.stock * cost;
 
                             console.log("Thank you for your purchase!");
-                            console.log("You're total is" + totalCost);
+                            console.log("You're total is: " + "$" + totalCost);
+                            console.log("[Press Ctr + C to quit]");
 
-                            keepShopping();
+                          
                         }
                     );
 
@@ -118,17 +114,23 @@ function start() {
                 else if (answer.stock > stock) {
 
                     console.log('Insufficient stock!');
+                    console.log("[Press Ctr + C to quit]");
 
-                    keepShopping();
+               
                 }
             });
     }
     );
 };
 
+//checks for connection, if successful run start()
+connection.connect(function (err) {
 
+    if (err) throw err;
 
+    start();
 
+});
 
 
 
